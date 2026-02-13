@@ -40,7 +40,6 @@ public/sw.js
 public/workbox-*.js
 
 # amplify
-amplify_outputs.json
 .amplify/
 
 # claude
