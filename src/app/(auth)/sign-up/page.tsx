@@ -14,8 +14,10 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<"form" | "confirm">("form");
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, confirmSignUpCode, signIn } = useAuth();
   const { toast } = useToast();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -24,14 +26,19 @@ export default function SignUpPage() {
       toast({ variant: "destructive", title: "Passwords don't match" });
       return;
     }
-    if (password.length < 6) {
-      toast({ variant: "destructive", title: "Password must be at least 6 characters" });
+    if (password.length < 8) {
+      toast({ variant: "destructive", title: "Password must be at least 8 characters with uppercase, lowercase, number, and symbol" });
       return;
     }
     setLoading(true);
     try {
-      await signUp(email, password, name);
-      toast({ title: "Account created!", description: "Welcome to WorkoutTracker." });
+      const result = await signUp(email, password, name);
+      if (result.needsConfirmation) {
+        setStep("confirm");
+        toast({ title: "Check your email", description: "We sent a verification code to your email." });
+      } else {
+        toast({ title: "Account created!", description: "Welcome to WorkoutTracker." });
+      }
     } catch (err) {
       toast({
         variant: "destructive",
@@ -41,6 +48,61 @@ export default function SignUpPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleConfirm(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await confirmSignUpCode(email, code);
+      toast({ title: "Email verified!", description: "Signing you in..." });
+      await signIn(email, password);
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Verification failed",
+        description: err instanceof Error ? err.message : "Invalid code",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (step === "confirm") {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Verify Email</CardTitle>
+          <CardDescription>Enter the 6-digit code sent to {email}</CardDescription>
+        </CardHeader>
+        <form onSubmit={handleConfirm}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="code">Verification Code</Label>
+              <Input
+                id="code"
+                placeholder="123456"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Verifying..." : "Verify & Sign In"}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setStep("form")}
+              className="text-sm text-primary hover:underline"
+            >
+              Back
+            </button>
+          </CardFooter>
+        </form>
+      </Card>
+    );
   }
 
   return (
@@ -77,7 +139,7 @@ export default function SignUpPage() {
             <Input
               id="password"
               type="password"
-              placeholder="At least 6 characters"
+              placeholder="Min 8 chars, upper, lower, number, symbol"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

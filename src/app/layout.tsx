@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import ConfigureAmplify from "@/lib/amplify-utils";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
       <body className={`${geistSans.variable} font-[family-name:var(--font-geist-sans)] antialiased`}>
+        <ConfigureAmplify />
         <AuthProvider>
           {children}
           <Toaster />
