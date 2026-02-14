@@ -53,23 +53,24 @@ function ActiveWorkoutContent() {
   // Initialize from routine if provided
   useEffect(() => {
     if (routineId && dayParam !== null) {
-      const routine = getRoutineById(routineId);
-      if (routine) {
-        setRoutineName(routine.name);
-        const dayIdx = parseInt(dayParam);
-        const day = routine.days[dayIdx];
-        if (day) {
-          const logExercises: WorkoutLogExercise[] = day.exercises.map((ex) => ({
-            exerciseId: ex.exerciseId,
-            sets: Array.from({ length: ex.targetSets }, () => ({
-              reps: ex.targetReps,
-              weight: 0,
-              completed: false,
-            })),
-          }));
-          setExercises(logExercises);
+      getRoutineById(routineId).then((routine) => {
+        if (routine) {
+          setRoutineName(routine.name);
+          const dayIdx = parseInt(dayParam);
+          const day = routine.days[dayIdx];
+          if (day) {
+            const logExercises: WorkoutLogExercise[] = day.exercises.map((ex) => ({
+              exerciseId: ex.exerciseId,
+              sets: Array.from({ length: ex.targetSets }, () => ({
+                reps: ex.targetReps,
+                weight: 0,
+                completed: false,
+              })),
+            }));
+            setExercises(logExercises);
+          }
         }
-      }
+      });
     }
   }, [routineId, dayParam]);
 
@@ -167,7 +168,7 @@ function ActiveWorkoutContent() {
     setRestTime(0);
   }
 
-  function handleFinish() {
+  async function handleFinish() {
     if (!user) return;
     if (exercises.length === 0) {
       toast({ variant: "destructive", title: "Add at least one exercise" });
@@ -175,7 +176,7 @@ function ActiveWorkoutContent() {
     }
 
     const duration = Math.floor((Date.now() - startTime) / 1000);
-    saveWorkoutLog({
+    await saveWorkoutLog({
       userId: user.id,
       date: new Date().toISOString(),
       routineId: routineId || undefined,

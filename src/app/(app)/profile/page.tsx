@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getWorkoutLogsByUser, getRoutinesByUser } from "@/lib/data-service";
+import { WorkoutLog, Routine } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,8 +12,21 @@ import { LogOut, Calendar, ClipboardList, Dumbbell } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
-  const logs = user ? getWorkoutLogsByUser(user.id) : [];
-  const routines = user ? getRoutinesByUser(user.id) : [];
+  const [logs, setLogs] = useState<WorkoutLog[]>([]);
+  const [routines, setRoutines] = useState<Routine[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      (async () => {
+        const [l, r] = await Promise.all([
+          getWorkoutLogsByUser(user.id),
+          getRoutinesByUser(user.id),
+        ]);
+        setLogs(l);
+        setRoutines(r);
+      })();
+    }
+  }, [user]);
 
   const initials = user?.name
     ? user.name
@@ -77,8 +92,7 @@ export default function ProfilePage() {
             fitness progress over time.
           </p>
           <p className="text-xs text-muted-foreground">
-            Data is stored locally in your browser. Connect AWS Amplify to sync
-            across devices.
+            Data syncs across devices via AWS Amplify.
           </p>
         </CardContent>
       </Card>

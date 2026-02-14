@@ -20,15 +20,20 @@ export default function RoutinesPage() {
 
   useEffect(() => {
     if (user) {
-      setMyRoutines(getRoutinesByUser(user.id));
-      setCommunityRoutines(
-        getPublicRoutines().filter((r) => r.ownerId !== user.id)
-      );
+      (async () => {
+        const [mine, pub] = await Promise.all([
+          getRoutinesByUser(user.id),
+          getPublicRoutines(),
+        ]);
+        setMyRoutines(mine);
+        setCommunityRoutines(pub.filter((r) => r.ownerId !== user.id));
+      })();
     }
   }, [user]);
 
-  function handleDelete(id: string) {
-    if (deleteRoutine(id)) {
+  async function handleDelete(id: string) {
+    const deleted = await deleteRoutine(id);
+    if (deleted) {
       setMyRoutines((prev) => prev.filter((r) => r.id !== id));
       toast({ title: "Routine deleted" });
     }

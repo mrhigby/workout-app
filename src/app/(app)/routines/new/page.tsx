@@ -88,14 +88,14 @@ export default function NewRoutinePage() {
     );
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!name.trim()) {
       toast({ variant: "destructive", title: "Please enter a routine name" });
       return;
     }
     if (!user) return;
 
-    saveRoutine({
+    await saveRoutine({
       ownerId: user.id,
       ownerName: user.name,
       name: name.trim(),

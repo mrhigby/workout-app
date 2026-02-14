@@ -21,15 +21,21 @@ function LogPageContent() {
   const searchParams = useSearchParams();
   const routineId = searchParams.get("routineId");
   const [routines, setRoutines] = useState<Routine[]>([]);
+  const [selectedRoutine, setSelectedRoutine] = useState<Routine | null>(null);
 
   useEffect(() => {
     if (user) {
-      setRoutines(getRoutinesByUser(user.id));
+      getRoutinesByUser(user.id).then(setRoutines);
     }
   }, [user]);
 
-  // If routineId is provided, show day selection for that routine
-  const selectedRoutine = routineId ? getRoutineById(routineId) : null;
+  useEffect(() => {
+    if (routineId) {
+      getRoutineById(routineId).then((r) => setSelectedRoutine(r ?? null));
+    } else {
+      setSelectedRoutine(null);
+    }
+  }, [routineId]);
 
   if (selectedRoutine) {
     return (

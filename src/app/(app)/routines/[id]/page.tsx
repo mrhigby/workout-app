@@ -21,8 +21,9 @@ export default function RoutineDetailPage() {
   const [routine, setRoutine] = useState<Routine | null>(null);
 
   useEffect(() => {
-    const r = getRoutineById(params.id as string);
-    if (r) setRoutine(r);
+    getRoutineById(params.id as string).then((r) => {
+      if (r) setRoutine(r);
+    });
   }, [params.id]);
 
   if (!routine) {
@@ -38,14 +39,14 @@ export default function RoutineDetailPage() {
 
   const isOwner = user?.id === routine.ownerId;
 
-  function handleDelete() {
-    deleteRoutine(routine!.id);
+  async function handleDelete() {
+    await deleteRoutine(routine!.id);
     toast({ title: "Routine deleted" });
     router.push("/routines");
   }
 
-  function togglePublic() {
-    const updated = updateRoutine(routine!.id, { isPublic: !routine!.isPublic });
+  async function togglePublic() {
+    const updated = await updateRoutine(routine!.id, { isPublic: !routine!.isPublic });
     if (updated) setRoutine(updated);
   }
 

@@ -17,8 +17,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      setRecentLogs(getWorkoutLogsByUser(user.id).slice(0, 5));
-      setRoutines(getRoutinesByUser(user.id));
+      (async () => {
+        const [logs, rts] = await Promise.all([
+          getWorkoutLogsByUser(user.id),
+          getRoutinesByUser(user.id),
+        ]);
+        setRecentLogs(logs.slice(0, 5));
+        setRoutines(rts);
+      })();
     }
   }, [user]);
 

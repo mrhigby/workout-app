@@ -32,7 +32,7 @@ export default function HistoryPage() {
 
   useEffect(() => {
     if (user) {
-      setLogs(getWorkoutLogsByUser(user.id));
+      getWorkoutLogsByUser(user.id).then(setLogs);
     }
   }, [user]);
 
@@ -43,13 +43,18 @@ export default function HistoryPage() {
     return Array.from(ids);
   }, [logs]);
 
-  const progressData = useMemo(() => {
-    if (!user || !selectedExercise) return [];
-    return getExerciseHistory(user.id, selectedExercise);
+  const [progressData, setProgressData] = useState<{ date: string; maxWeight: number; totalVolume: number }[]>([]);
+
+  useEffect(() => {
+    if (!user || !selectedExercise) {
+      setProgressData([]);
+      return;
+    }
+    getExerciseHistory(user.id, selectedExercise).then(setProgressData);
   }, [user, selectedExercise]);
 
-  function handleDelete(id: string) {
-    deleteWorkoutLog(id);
+  async function handleDelete(id: string) {
+    await deleteWorkoutLog(id);
     setLogs((prev) => prev.filter((l) => l.id !== id));
     toast({ title: "Workout deleted" });
   }
