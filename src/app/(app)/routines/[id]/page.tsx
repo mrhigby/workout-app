@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Trash2, Users, Lock, ArrowLeft } from "lucide-react";
+import { Play, Pencil, Trash2, Users, Lock, ArrowLeft } from "lucide-react";
 
 export default function RoutineDetailPage() {
   const params = useParams();
@@ -132,6 +132,12 @@ export default function RoutineDetailPage() {
         <>
           <Separator />
           <div className="space-y-3">
+            <Button variant="outline" className="w-full" asChild>
+              <Link href={`/routines/${routine.id}/edit`}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit Routine
+              </Link>
+            </Button>
             <Button variant="outline" className="w-full" onClick={togglePublic}>
               {routine.isPublic ? (
                 <>
